@@ -13,6 +13,11 @@ var baseStyle = lipgloss.NewStyle().
 	BorderStyle(lipgloss.NormalBorder()).
 	BorderForeground(lipgloss.Color("240"))
 
+var Columns = []table.Column{
+		{Title: "Website", Width: 25},
+		{Title: "Username", Width: 25},
+		{Title: "Password", Width: 25},
+	}
 type model struct {
 	table table.Model
 }
@@ -33,7 +38,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "q", "ctrl+c":
 			return m, tea.Quit
         case "d":
-            return m, m.DeleteCurrent() 
+            return m.DeleteCurrent()
 		}
 	}
 	m.table, cmd = m.table.Update(msg)
@@ -45,15 +50,18 @@ func (m model) View() string {
 }
 
 func Main() {
-	columns := []table.Column{
-		{Title: "Website", Width: 25},
-		{Title: "Username", Width: 25},
-		{Title: "Password", Width: 25},
+    m := CreateTable()
+	if _, err := tea.NewProgram(m, tea.WithAltScreen()).Run(); err != nil {
+		fmt.Println("Error running program:", err)
+		os.Exit(1)
 	}
+}
+
+func CreateTable() model{
     rows := SqlList()
 
 	t := table.New(
-		table.WithColumns(columns),
+		table.WithColumns(Columns),
 		table.WithRows(rows),
 		table.WithFocused(true),
 		table.WithHeight(7),
@@ -72,16 +80,15 @@ func Main() {
 	t.SetStyles(s)
 
 	m := model{t}
-	if _, err := tea.NewProgram(m, tea.WithAltScreen()).Run(); err != nil {
-		fmt.Println("Error running program:", err)
-		os.Exit(1)
-	}
+
+    return m
 }
 
-func (m *model) DeleteCurrent() tea.Cmd {
+func (m model) DeleteCurrent() (tea.Model, tea.Cmd) {
     SqlRemove(m.table.SelectedRow()[0])
+    m = CreateTable()
 
     var cmd tea.Cmd
     m.table, cmd = m.table.Update(nil)
-    return cmd
+    return m, cmd
 }
