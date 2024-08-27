@@ -32,14 +32,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		case "q", "ctrl+c":
 			return m, tea.Quit
-		case "enter":
-			return m, tea.Batch(
-				tea.Printf("Let's go to %s!", m.table.SelectedRow()[1]),
-			)
         case "d":
-            selectedRow := m.table.SelectedRow()
-            SqlRemove(selectedRow[0])
-            return m, nil
+            return m, m.DeleteCurrent() 
 		}
 	}
 	m.table, cmd = m.table.Update(msg)
@@ -57,13 +51,6 @@ func Main() {
 		{Title: "Password", Width: 25},
 	}
     rows := SqlList()
-
-	// rows := []table.Row{
- //        {"Google", "codybense@gmail.com", "ZXcvbnm12__"},
- //        {"test1", "test1", "test1"},
- //        {"test2", "test2", "test2"},
- //        {"test3", "test3", "test3"},
-	// }
 
 	t := table.New(
 		table.WithColumns(columns),
@@ -89,4 +76,12 @@ func Main() {
 		fmt.Println("Error running program:", err)
 		os.Exit(1)
 	}
+}
+
+func (m *model) DeleteCurrent() tea.Cmd {
+    SqlRemove(m.table.SelectedRow()[0])
+
+    var cmd tea.Cmd
+    m.table, cmd = m.table.Update(nil)
+    return cmd
 }
