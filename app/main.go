@@ -39,6 +39,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
         case "d":
             return m.DeleteCurrent()
+        case "a":
+            return m.AddLogin()
 		}
 	}
 	m.table, cmd = m.table.Update(msg)
@@ -86,6 +88,15 @@ func CreateTable() model{
 
 func (m model) DeleteCurrent() (tea.Model, tea.Cmd) {
     SqlRemove(m.table.SelectedRow()[0])
+    m = CreateTable()
+
+    var cmd tea.Cmd
+    m.table, cmd = m.table.Update(nil)
+    return m, cmd
+}
+
+func (m model) AddLogin() (tea.Model, tea.Cmd) {
+    SqlAdd("test", "test", "test")
     m = CreateTable()
 
     var cmd tea.Cmd
