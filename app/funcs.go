@@ -47,7 +47,7 @@ func SqlList() []table.Row{
     // Select all from todo
     rows, err := db.Query("SELECT * FROM login")
     if err != nil {
-        log.Fatalf("not able to conduct query: %s", err)
+        log.Fatalf("not able to select conduct query: %s", err)
     }
     defer rows.Close()
 
